@@ -1,0 +1,4 @@
+Die Excel-Datei "Geographische Kennzahlen" habe ich von hier heruntergeladen: https://www.agvchapp.bfs.admin.ch/de/kennzahlen/results?SnapshotDate=06.04.2025&Unit=Communes&IncCentroid=True
+Anschliessend habe ich in dieser Datei nach Graubünden gefiltert und diese in die Datei "Gemeinden_Graubünden" kopiert.
+Dort habe ich mit dem Skript "transform_coordinates" die WGS48 Koorindaten ergänzt (d.h. die Spalten Lat und Lon)
+
