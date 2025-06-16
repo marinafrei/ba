@@ -24,7 +24,8 @@ app.layout = html.Div([
     ]),
     dbc.Row([
         dbc.Col(["Um die Schliessung einer Geburtsabteilung zu simulieren, entfernen Sie das entsprechende Spital in der Auwahl des Dropdown-Menüs.", 
-                 dcc.Dropdown(spitaeler_namelist_all, spitaeler_namelist_current, id="spitaeler_dropdown", multi=True)])
+                 dcc.Dropdown(spitaeler_namelist_all, spitaeler_namelist_current, id="spitaeler_dropdown", multi=True)]),
+                 html.Button("Zurücksetzen des Dropdowns auf den aktuellen IST-Zustand der Geburtsabteilungen", id="reset-dropdown", n_clicks=0)
     ]),
     dbc.Row([
         dbc.Col([dcc.Graph(id="graph-map")], width=8),
@@ -32,6 +33,13 @@ app.layout = html.Div([
     ], style={"margin-top":"1rem"})
     ], style={"margin":".5rem 1rem"}) #Endtag html.DIV
 
+@app.callback(
+    Output("spitaeler_dropdown", "value"),
+    Input("reset-dropdown", "n_clicks"),
+    prevent_initial_call=True)
+
+def reset_dropdown(n_clicks):
+    return spitaeler_namelist_current
 
 
 @callback(Output("graph-map", "figure"),
@@ -53,7 +61,8 @@ def create_df_for_map(gewaehlte_spitaeler):
         featureidkey="properties.HIST_NR",
         color="MinFahrzeit",
         hover_name="GDENAME",
-        color_continuous_scale="Viridis",
+        color_continuous_scale="ylorbr",
+        range_color=(0,100),
         title="Minimale Fahrzeit zur Geburtshilfe pro Gemeinde"
     )
 
