@@ -25,8 +25,10 @@ app.layout = html.Div([
     ]),
     dbc.Row([
         dbc.Col(["Um die Schliessung einer Geburtsabteilung zu simulieren, entfernen Sie das entsprechende Spital in der Auwahl des Dropdown-Menüs.", 
-                 dcc.Dropdown(spitaeler_namelist_all, spitaeler_namelist_current, id="spitaeler_dropdown", multi=True)]),
-                 html.Button("Zurücksetzen des Dropdowns auf den aktuellen IST-Zustand der Geburtsabteilungen", id="reset-dropdown", n_clicks=0)
+                 dcc.Dropdown(spitaeler_namelist_all, spitaeler_namelist_current, id="spitaeler_dropdown", multi=True),
+                 html.Button("Zurücksetzen des Dropdowns auf den aktuellen IST-Zustand der Geburtsabteilungen", id="reset-dropdown", n_clicks=0)], width=9),
+        dbc.Col(["Wählen Sie die Einheit für die Darstellung in den Diagrammen",
+                 dcc.RadioItems(["Fahrzeit in min", "Distanz in km"], "Fahrzeit in min", id="radioitems_unit")], width=3)
     ]),
     dbc.Row([
         dbc.Col([dcc.Graph(id="graph-map")], width=8),
@@ -45,47 +47,54 @@ def reset_dropdown(n_clicks):
 
 @callback([Output("graph-map", "figure"),
           Output("graph-bar", "figure")],
-          Input("spitaeler_dropdown", "value"))
+          Input("spitaeler_dropdown", "value"),
+          Input("radioitems_unit", "value"))
 
-def create_figures(gewaehlte_spitaeler):
+def create_figures(gewaehlte_spitaeler, gewaehlte_einheit):
     df_results_filtered = df_results[df_results["Spitalname"].isin(gewaehlte_spitaeler)]
-    min_fahrzeiten = df_results_filtered.groupby("GDENAME")["Fahrzeit in min"].min().reset_index()
-    min_fahrzeiten.columns = ["GDENAME", "MinFahrzeit"]
+    min = df_results_filtered.groupby("GDENAME")[gewaehlte_einheit].min().reset_index()
+    min.columns = ["GDENAME", gewaehlte_einheit]
 
     df_gemeinden_subset = df_gemeinden[["GDEHISTID", "GDENAME"]]
-    df_min_fahrzeit = df_gemeinden_subset.merge(min_fahrzeiten, on="GDENAME", how="inner")
+    df_min = df_gemeinden_subset.merge(min, on="GDENAME", how="inner")
     df_population_subset = df_population[["GDENAME", "Alle betroffenen Personen"]]
-    df_min_fahrzeit = df_min_fahrzeit.merge(df_population_subset, on="GDENAME", how="inner")
+    df_min = df_min.merge(df_population_subset, on="GDENAME", how="inner")
 
     fig_map = px.choropleth(
-        df_min_fahrzeit,
+        df_min,
         geojson=gemeinden,
         locations="GDEHISTID",
         featureidkey="properties.HIST_NR",
-        color="MinFahrzeit",
+        color=gewaehlte_einheit,
         hover_name="GDENAME",
         color_continuous_scale="ylorbr",
         range_color=(0,100),
-        title="Minimale Fahrzeit zur Geburtshilfe pro Gemeinde"
+        title=f"Minimale {gewaehlte_einheit} zur Geburtshilfe pro Gemeinde"
     )
 
     fig_map.update_geos(fitbounds="locations", visible=False)
     fig_map.update_layout(margin={"r":0,"t":30,"l":0,"b":0})
 
     bins = list(range(0, 120, 10)) + [120, 260]
-    labels = ['0-9 Min', '10-19 Min', '20-29 Min', '30-39 Min', '40-49 Min', '50-59 Min', '60-69 Min', '70-79 Min', '80-89 Min', '90-99 Min', '100-109 Min', '110-119 Min', '120+ Min']
-    df_min_fahrzeit["FahrzeitKlasse"] = pd.cut(df_min_fahrzeit["MinFahrzeit"], bins=bins, labels=labels, right=False)
-    df_min_fahrzeit = df_min_fahrzeit.sort_values(by="FahrzeitKlasse")
-    df_grouped = df_min_fahrzeit.groupby("FahrzeitKlasse", as_index=False, observed=False)["Alle betroffenen Personen"].sum()
+    if gewaehlte_einheit == "Fahrzeit in min":
+        labels = [f"{i}-{i+9} Min" for i in bins[:-2]] + ["120+ Min"]
+    else:
+        labels = [f"{i}-{i+9} km" for i in bins[:-2]] + ["120+ Min"]
+    df_min["Klasse"] = pd.cut(df_min[gewaehlte_einheit], bins=bins, labels=labels, right=False)
+    df_min = df_min.sort_values(by="Klasse")
+    df_grouped = df_min.groupby("Klasse", as_index=False, observed=False)["Alle betroffenen Personen"].sum()
         
     fig_bar = px.bar(
         df_grouped,
-        x="FahrzeitKlasse",
+        x="Klasse",
         y="Alle betroffenen Personen",
         title="Fahrzeitverteilung"
     )
 
-    fig_bar.update_layout(xaxis_title="Fahrzeit in Minuten", yaxis_title="Anzahl betroffene Personen")
+    fig_bar.update_layout(xaxis_title=gewaehlte_einheit, yaxis_title="Anzahl betroffene Personen")
+
+    df_min.to_excel("df_min.xlsx")
+    df_grouped.to_excel("df_grouped.xlsx")
 
     return fig_map, fig_bar
 
