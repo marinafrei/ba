@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 
-app = Dash (__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash (__name__, external_stylesheets=[dbc.themes.FLATLY])
 
 with open("./Kartendaten/transformiert/Kartendaten_Gemeinden.geojson") as f:
     gemeinden = json.load(f)
@@ -21,15 +21,16 @@ spitaeler_namelist_current = spitaeler_namelist_all[:7]
 
 app.layout = html.Div([
     dbc.Row([
-        dbc.Col([html.H1("Räumliche Erreichbarkeit geburtshilflicher Versorgungsangebote im Kanton Graubünden", style={"font-size":"1.8rem", "margin-bottom":"1rem"})], width=12)
+        dbc.Col([html.H1("Räumliche Erreichbarkeit geburtshilflicher Versorgungsangebote im Kanton Graubünden", style={"font-size":"1.8rem", "margin-bottom":"1rem", "color":"#2176BC"})], width=12)
     ]),
     dbc.Row([
-        dbc.Col(["Um die Schliessung einer Geburtsabteilung zu simulieren, entfernen Sie das entsprechende Spital in der Auwahl des Dropdown-Menüs.", 
+        dbc.Col([html.Div(["Um die Schliessung einer Geburtsabteilung zu simulieren, entfernen Sie das entsprechende Spital in der Auwahl des Dropdown-Menüs.", 
                  dcc.Dropdown(spitaeler_namelist_all, spitaeler_namelist_current, id="spitaeler_dropdown", multi=True),
-                 html.Button("Zurücksetzen des Dropdowns auf den aktuellen IST-Zustand der Geburtsabteilungen", id="reset-dropdown", n_clicks=0)], width=9),
+                 dbc.Button("Zurücksetzen des Dropdowns auf den aktuellen IST-Zustand der Geburtsabteilungen", id="reset-dropdown", n_clicks=0, style={"margin": "5px 0"})], style={"backgroundColor":"#A0CCF0", "borderRadius":"10px", "margin-right":"5px", "padding":"0 12px"})
+                 ], style={"padding":"0"}, width=9),
         dbc.Col(["Wählen Sie die Einheit für die Darstellung in den Diagrammen",
-                 dcc.RadioItems(["Fahrzeit in min", "Distanz in km"], "Fahrzeit in min", id="radioitems_unit")], width=3)
-    ]),
+                 dcc.RadioItems(["Fahrzeit in min", "Distanz in km"], "Fahrzeit in min", id="radioitems_unit")], style={"backgroundColor":"#A0CCF0", "borderRadius":"10px"}, width=3)
+    ], style={"backgroundColor":"#C6E0F5", "padding":"12px", "borderRadius":"10px"}),
     dbc.Row([
         dbc.Col([dcc.Graph(id="graph-map")], width=8),
         dbc.Col([dcc.Graph(id="graph-bar")], width=4)
@@ -88,13 +89,11 @@ def create_figures(gewaehlte_spitaeler, gewaehlte_einheit):
         df_grouped,
         x="Klasse",
         y="Alle betroffenen Personen",
-        title="Fahrzeitverteilung"
+        title="Verteilung der betroffenen Personen",
+        color_discrete_sequence=["#42313A"]
     )
 
-    fig_bar.update_layout(xaxis_title=gewaehlte_einheit, yaxis_title="Anzahl betroffene Personen")
-
-    df_min.to_excel("df_min.xlsx")
-    df_grouped.to_excel("df_grouped.xlsx")
+    fig_bar.update_layout(template="plotly_white", xaxis_title=gewaehlte_einheit, yaxis_title="Anzahl betroffene Personen")
 
     return fig_map, fig_bar
 
