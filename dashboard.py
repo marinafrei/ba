@@ -32,8 +32,14 @@ app.layout = html.Div([
                  dcc.RadioItems(["Fahrzeit in min", "Distanz in km"], "Fahrzeit in min", id="radioitems_unit")], style={"backgroundColor":"#A0CCF0", "borderRadius":"10px"}, width=3)
     ], style={"backgroundColor":"#C6E0F5", "padding":"12px", "borderRadius":"10px"}),
     dbc.Row([
-        dbc.Col([dcc.Graph(id="graph-map")], width=8),
-        dbc.Col([dcc.Graph(id="graph-bar")], width=4)
+        dbc.Col([
+            dcc.Loading(id="loading-map", type="circle", overlay_style={"visibility":"visible", "filter": "blur(2px)"}, children=
+            dcc.Graph(id="graph-map"))
+        ], width=8),
+        dbc.Col([
+            dcc.Loading(id="loading-bar", type="circle", overlay_style={"visibility":"visible", "filter": "blur(2px)"}, children=
+            dcc.Graph(id="graph-bar"))
+            ], width=4)
     ], style={"margin-top":"1rem"})
     ], style={"margin":".5rem 1rem"}) #Endtag html.DIV
 
@@ -58,7 +64,7 @@ def create_figures(gewaehlte_spitaeler, gewaehlte_einheit):
 
     df_gemeinden_subset = df_gemeinden[["GDEHISTID", "GDENAME"]]
     df_min = df_gemeinden_subset.merge(min, on="GDENAME", how="inner")
-    df_population_subset = df_population[["GDENAME", "Alle betroffenen Personen"]]
+    df_population_subset = df_population[["GDENAME", "Alle betroffenen Frauen"]]
     df_min = df_min.merge(df_population_subset, on="GDENAME", how="inner")
 
     fig_map = px.choropleth(
@@ -83,13 +89,13 @@ def create_figures(gewaehlte_spitaeler, gewaehlte_einheit):
         labels = [f"{i}-{i+9} km" for i in bins[:-2]] + ["120+ Min"]
     df_min["Klasse"] = pd.cut(df_min[gewaehlte_einheit], bins=bins, labels=labels, right=False)
     df_min = df_min.sort_values(by="Klasse")
-    df_grouped = df_min.groupby("Klasse", as_index=False, observed=False)["Alle betroffenen Personen"].sum()
+    df_grouped = df_min.groupby("Klasse", as_index=False, observed=False)["Alle betroffenen Frauen"].sum()
         
     fig_bar = px.bar(
         df_grouped,
         x="Klasse",
-        y="Alle betroffenen Personen",
-        title="Verteilung der betroffenen Personen",
+        y="Alle betroffenen Frauen",
+        title="Verteilung potenziell betroffener Personen <br>(Frauen im Alter von 15-54 Jahren)",
         color_discrete_sequence=["#42313A"]
     )
 
