@@ -40,7 +40,10 @@ app.layout = html.Div([
             dcc.Loading(id="loading-bar", type="circle", overlay_style={"visibility":"visible", "filter": "blur(2px)"}, children=
             dcc.Graph(id="graph-bar"))
             ], width=4)
-    ], style={"margin-top":"1rem"})
+    ], style={"margin-top":"1rem"}),
+    dbc.Row([
+        dbc.Col(["© openrouteservice.org by HeiGIT | Map data © OpenStreetMap contributors"])
+    ])
     ], style={"margin":".5rem 1rem"}) #Endtag html.DIV
 
 @app.callback(
