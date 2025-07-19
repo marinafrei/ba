@@ -21,7 +21,43 @@ spitaeler_namelist_current = spitaeler_namelist_all[:7]
 
 app.layout = html.Div([
     dbc.Row([
-        dbc.Col([html.H1("Räumliche Erreichbarkeit geburtshilflicher Versorgungsangebote im Kanton Graubünden", style={"font-size":"1.8rem", "margin-bottom":"1rem", "color":"#2176BC"})], width=12)
+        dbc.Col([html.H1("Räumliche Erreichbarkeit geburtshilflicher Versorgungsangebote im Kanton Graubünden", style={"font-size":"1.8rem", "margin-bottom":"1rem", "color":"#2176BC"})], width=11),
+        dbc.Col([dbc.Button("i", id="info", style={'width': '30px', 'height': '30px', 'border-radius': '50%', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'backgroundColor': "#2176BC", 'border-color': 'white', 'border-width': '3px'}),
+                 dbc.Modal([
+                     dbc.ModalHeader(dbc.ModalTitle("Informationen zum Datensatz")),
+                     dbc.ModalBody([
+                         html.Div([
+                             "Das vorliegende Dashboard wurde im Rahmen einer Bachelorarbeit erstellt, welche die Veränderung der räumlichen Erreichbarkeit geburtshilflicher Versorgungsangebote für die Bevölkerung im Kanton Graubünden bei Schliessung von Standorten untersuchte.",
+                             html.Br(),
+                             html.Br(),
+                             "Für die Erstellung des Kartendiagramms würde der Datensatz swissBOUNDARIES3D vom Bundesamt für Landestopografie verwendet:",
+                             html.Br(),
+                             html.A("https://www.swisstopo.admin.ch/de/landschaftsmodell-swissboundaries3d", href="https://www.swisstopo.admin.ch/de/landschaftsmodell-swissboundaries3d", target="_blank"),
+                             html.Br(),
+                             html.Br(),
+                             "Für die Ermittlung der Distanzen sowie Fahrzeiten von den Gemeinden zu den Spitälern, wurde die Time-Distance Matrix API-Schnittstelle des Openrouteservice verwendet:",
+                             html.Br(),
+                             html.A("https://openrouteservice.org/services/", href="https://openrouteservice.org/services/", target="_blank"),
+                             html.Br(),
+                             html.Br(),
+                             "Die Ermittlung der Koordinaten der Spitäler erfolgte auf Basis der auf den jeweiligen Spitalwebseiten angegebenen Adressen unter Zuhilfenahme eines digitalen Kartendienstes.",
+                             html.Br(),
+                             "Bezüglich der Koordinaten der Gemeinden wurde der Datensatz 'Geographische Kennzahlen Gemeinden' des Bundesamts für Statistik verwendet:",
+                             html.Br(),
+                             html.A("https://www.agvchapp.bfs.admin.ch/de/kennzahlen/results?SnapshotDate=06.04.2025&Unit=Communes&IncCentroid=True", href="https://www.agvchapp.bfs.admin.ch/de/kennzahlen/results?SnapshotDate=06.04.2025&Unit=Communes&IncCentroid=True", target="_blank"),
+                             html.Br(),
+                             "Der Datensatz enthält die Zentrumskoordinaten jeder Schweizer Gemeinde. Die Zentrumskoordinate entspricht dabei dem wichtigsten sozioökonomischen Zentrum der Gemeinde.",
+                             html.Br(),
+                             html.Br(),
+                             "Der Anzeige der Anzahl der potenziell betroffenen Personen liegt der Datensatz 'Ständige Wohnbevölkerung nach Eckwerten, Gemeinden, 2010-2023' aus dem Jahr 2023 zugrunde:",
+                             html.Br(),
+                             html.A("https://www.gr.ch/DE/institutionen/verwaltung/dvs/awt/statistik/Bevoelkerung/Seiten/Bevoelkerungsstand_und_-struktur.aspx", href="https://www.gr.ch/DE/institutionen/verwaltung/dvs/awt/statistik/Bevoelkerung/Seiten/Bevoelkerungsstand_und_-struktur.aspx", target="_blank"),
+                             html.Br(),
+                             "Da dort allerdings eine geschlechtsspezifische Aufschlüsselung innerhalb der Alterskategorien nicht verfügbar ist, wurde der Anteil der Frauen in den Alerskategorien gemäss der Geschlechterverteilung in der Gesamtbevölkerung (50% Frauen, 50% Männer)  geschätzt."
+                         ], style={"wordBreak": "break-word", "whiteSpace": "normal"})
+                     ])
+                 ], id="modal", is_open=False)
+        ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}, width=1)
     ]),
     dbc.Row([
         dbc.Col([html.Div(["Um die Schliessung einer Geburtsabteilung zu simulieren, entfernen Sie das entsprechende Spital in der Auwahl des Dropdown-Menüs.", 
@@ -53,6 +89,14 @@ app.layout = html.Div([
 
 def reset_dropdown(n_clicks):
     return spitaeler_namelist_current
+
+@callback(Output('modal', 'is_open'),
+          Input('info', 'n_clicks'),
+          prevent_initial_call=True)
+
+def manage_info_popup(n_clicks):
+    is_open = True
+    return is_open
 
 
 @callback([Output("graph-map", "figure"),
@@ -93,7 +137,7 @@ def create_figures(gewaehlte_spitaeler, gewaehlte_einheit):
     df_min["Klasse"] = pd.cut(df_min[gewaehlte_einheit], bins=bins, labels=labels, right=False)
     df_min = df_min.sort_values(by="Klasse")
     df_grouped = df_min.groupby("Klasse", as_index=False, observed=False)["Alle betroffenen Frauen"].sum()
-        
+
     fig_bar = px.bar(
         df_grouped,
         x="Klasse",
