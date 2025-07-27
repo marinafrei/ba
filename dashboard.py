@@ -9,10 +9,11 @@ app = Dash (__name__, external_stylesheets=[dbc.themes.FLATLY])
 with open("./Kartendaten/transformiert/Kartendaten_Gemeinden.geojson") as f:
     gemeinden = json.load(f)
 
-df_results = pd.read_excel("results.xlsx")
-df_gemeinden = pd.read_excel("Gemeinden_Graubünden.xlsx")
-df_spitaeler = pd.read_excel("Spitalliste_bereinigt_fuer_Dashboard.xlsx")
-df_population = pd.read_excel("Bevölkerung_Kanton_Graubünden.xlsx", usecols="A,AA,AB,AC", header=1)
+df_results = pd.read_excel("results_Fahrzeitanalyse.xlsx")
+df_gemeinden = pd.read_excel("Geographische_Kennzahlen_Gemeinden.xlsx")
+df_spitaeler = pd.read_excel("Spitalliste.xlsx")
+df_population = pd.read_excel("Bevölkerung_Kanton_Graubünden.xlsx", usecols="A,AA", header=1)
+
 
 spitaeler_namelist_all = df_spitaeler["Spitalname"].values.tolist()
 spitaeler_namelist_current = spitaeler_namelist_all[:7]
@@ -24,7 +25,7 @@ app.layout = html.Div([
         dbc.Col([html.H1("Räumliche Erreichbarkeit geburtshilflicher Versorgungsangebote im Kanton Graubünden", style={"font-size":"1.8rem", "margin-bottom":"1rem", "color":"#2176BC"})], width=11),
         dbc.Col([dbc.Button("i", id="info", style={'width': '30px', 'height': '30px', 'border-radius': '50%', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'backgroundColor': "#2176BC", 'border-color': 'white', 'border-width': '3px'}),
                  dbc.Modal([
-                     dbc.ModalHeader(dbc.ModalTitle("Informationen zum Datensatz")),
+                     dbc.ModalHeader(dbc.ModalTitle("Informationen zu Datenquellen")),
                      dbc.ModalBody([
                          html.Div([
                              "Das vorliegende Dashboard wurde im Rahmen einer Bachelorarbeit erstellt, welche die Veränderung der räumlichen Erreichbarkeit geburtshilflicher Versorgungsangebote für die Bevölkerung im Kanton Graubünden bei Schliessung von Standorten untersuchte.",
