@@ -54,7 +54,12 @@ app.layout = html.Div([
                              html.Br(),
                              html.A("https://www.gr.ch/DE/institutionen/verwaltung/dvs/awt/statistik/Bevoelkerung/Seiten/Bevoelkerungsstand_und_-struktur.aspx", href="https://www.gr.ch/DE/institutionen/verwaltung/dvs/awt/statistik/Bevoelkerung/Seiten/Bevoelkerungsstand_und_-struktur.aspx", target="_blank"),
                              html.Br(),
-                             "Da dort allerdings eine geschlechtsspezifische Aufschlüsselung innerhalb der Alterskategorien nicht verfügbar ist, wurde der Anteil der Frauen in den Alerskategorien gemäss der Geschlechterverteilung in der Gesamtbevölkerung (50% Frauen, 50% Männer)  geschätzt."
+                             "Da dort allerdings eine geschlechtsspezifische Aufschlüsselung innerhalb der Alterskategorien nicht verfügbar ist, wurde der Anteil der Frauen in den Alerskategorien gemäss der Geschlechterverteilung in der Gesamtbevölkerung (50% Frauen, 50% Männer)  geschätzt.",
+                             html.Br(),
+                             html.Br(),
+                             "Der Code zum Dashboard kann in Github abgerufen werden:",
+                             html.Br(),
+                             html.A("https://github.com/marinafrei/ba", href="https://github.com/marinafrei/ba", target="_blank")                             
                          ], style={"wordBreak": "break-word", "whiteSpace": "normal"})
                      ])
                  ], id="modal", is_open=False)
