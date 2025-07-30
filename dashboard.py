@@ -134,7 +134,7 @@ def create_figures(gewaehlte_spitaeler, gewaehlte_einheit):
     if gewaehlte_einheit == "Fahrzeit in min":
         labels = [f"{i}-{i+9} Min" for i in bins[:-2]] + ["120+ Min"]
     else:
-        labels = [f"{i}-{i+9} km" for i in bins[:-2]] + ["120+ Min"]
+        labels = [f"{i}-{i+9} km" for i in bins[:-2]] + ["120+ km"]
     df_min["Klasse"] = pd.cut(df_min[gewaehlte_einheit], bins=bins, labels=labels, right=False)
     df_min = df_min.sort_values(by="Klasse")
     df_grouped = df_min.groupby("Klasse", as_index=False, observed=False)["Alle betroffenen Frauen"].sum()
@@ -147,7 +147,7 @@ def create_figures(gewaehlte_spitaeler, gewaehlte_einheit):
         color_discrete_sequence=["#42313A"]
     )
 
-    fig_bar.update_layout(template="plotly_white", xaxis_title=gewaehlte_einheit, yaxis_title="Anzahl betroffene Personen")
+    fig_bar.update_layout(yaxis=dict(range=[0, 28000]), template="plotly_white", xaxis_title=gewaehlte_einheit, yaxis_title="Anzahl betroffene Personen")
 
     return fig_map, fig_bar
 
